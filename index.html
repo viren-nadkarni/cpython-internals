@@ -4,11 +4,11 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+		<title>CPython Internals</title>
 
 		<link rel="stylesheet" href="css/reset.css">
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+		<link rel="stylesheet" href="css/theme/white.css">
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/monokai.css">
@@ -25,8 +25,52 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+
+        <section>
+          <h2>CPython Internals</h2>
+          <p>Viren Nadkarni</p>
+          <p><small>Cambridge Python Users Group, 19 February 2020</small></p>
+        </section>
+
+				<section>
+          <h2>About</h2>
+          <p>Software Engineer at Speechmatics</p>
+          <p>https://nadk.xyz</p>
+          <p>viren_ndk on Twitter</p>
+          <p>viren-nadkarni on GitHub</p>
+        </section>
+
+        <section>
+          <h2>
+            Compilation
+          </h2>
+        </section>
+
+        <section>
+          foo.py 
+          <pre><code>
+          a = 42
+          b = 3.1415
+
+          print(a + b)
+          </code></pre>
+        </section>
+
+        <section>
+          Run foo.py
+        </section>
+
+        <section>
+          Compile foo.py
+        </section>
+
+        <section>
+          Run foo.pyc
+        </section>
+
+        <section>
+          Dump foo.pyc
+        </section>
 			</div>
 		</div>
 
@@ -38,6 +82,8 @@
 			// - https://github.com/hakimel/reveal.js#dependencies
 			Reveal.initialize({
 				hash: true,
+        slideNumber: true,
+        transition: 'slide',
 				dependencies: [
 					{ src: 'plugin/markdown/marked.js' },
 					{ src: 'plugin/markdown/markdown.js' },
