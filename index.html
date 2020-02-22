@@ -9,6 +9,7 @@
 		<link rel="stylesheet" href="css/reset.css">
 		<link rel="stylesheet" href="css/reveal.css">
 		<link rel="stylesheet" href="css/theme/white.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/monokai.css">
@@ -28,27 +29,25 @@
 
         <section>
           <h2>CPython Internals</h2>
+          <p>CamPUG<br/>19 Feb 2020</p>
           <p>Viren Nadkarni</p>
-          <p><small>Cambridge Python Users Group, 19 February 2020</small></p>
         </section>
 
 				<section>
           <h2>About</h2>
           <p>Software Engineer at Speechmatics</p>
-          <p>https://nadk.xyz</p>
-          <p>viren_ndk on Twitter</p>
-          <p>viren-nadkarni on GitHub</p>
+          <p>https://nadk.xyz<br/>
+          <span class="fa fa-twitter"></span> viren_ndk<br/>
+          <span class="fa fa-github"></span> viren-nadkarni</p>
         </section>
 
         <section>
-          <h2>
-            Compilation
-          </h2>
+          Compilation
         </section>
 
         <section>
           foo.py 
-          <pre><code>
+          <pre><code data-trim data-line-numbers>
           a = 42
           b = 3.1415
 
@@ -58,18 +57,127 @@
 
         <section>
           Run foo.py
+          <pre><code data-trim data-line-numbers>           
+          $ python3 foo.py
+          45.14
+          </code></pre>
         </section>
 
         <section>
-          Compile foo.py
+          Compiling
+          <pre><code data-trim data-line-numbers="1|3-4|6-7">           
+          $ python3 -m py_compile foo.py
+
+          $ ls __pycache__/
+          foo.cpython-37.pyc
+
+          $ python3 __pycache__/foo.cpython-37.pyc
+          45.14
+          </code></pre>
         </section>
 
         <section>
-          Run foo.pyc
+          What is the pyc file
+          <pre><code data-trim data-line-numbers="1-2|4-13">           
+          $ file __pycache__/foo.cpython-37.pyc
+          __pycache__/foo.cpython-37.pyc: data
+          
+          $ xxd __pycache__/foo.cpython-37.pyc
+          420d 0d0a 0000 0000 3a13 515e 1d00 0000  B.......:.Q^....
+          e300 0000 0000 0000 0000 0000 0003 0000  ................
+          0040 0000 0073 1800 0000 6400 5a00 6401  .@...s....d.Z.d.
+          5a01 6502 6501 6500 1700 8301 0100 6402  Z.e.e.e.......d.
+          5300 2903 e92a 0000 0067 1f85 eb51 b81e  S.)..*...g...Q..
+          0940 4e29 03da 0161 da01 62da 0570 7269  .@N)...a..b..pri
+          6e74 a900 7205 0000 0072 0500 0000 fa06  nt..r....r......
+          666f 6f2e 7079 da08 3c6d 6f64 756c 653e  foo.py..&lt;module&gt;
+          0100 0000 7304 0000 0004 0104 01         ....s........
+          </code></pre>
         </section>
 
         <section>
-          Dump foo.pyc
+          Interpreter
+          <pre><code data-trim data-line-numbers="1-3|4|5-9|10-11">
+          $ python3
+          Python 3.7.5 (default, Nov  1 2019, 02:16:32)
+          &gt;&gt;&gt; src = open('foo.py', 'r').read()
+          &gt;&gt;&gt; c = compile(src, 'foo.py', 'exec')
+          &gt;&gt;&gt; help('compile')
+          compile(source, filename, mode, ...)
+          Compile source into a code object that can be executed by
+          exec() or eval().
+          ...
+          &gt;&gt;&gt; c
+          &lt;code object &lt;module&gt; at 0x10751e0, file "foo.py", line 1&gt;
+          </code></pre>
+        </section>
+
+        <section>
+          Code Objects
+          <pre><code data-trim data-line-numbers>
+          &gt;&gt;&gt; dir(c)
+          ['__class__', '__delattr__', '__dir__', '__doc__',
+          ...
+          'co_argcount', 'co_cellvars', 'co_code', 'co_consts',
+          'co_filename', 'co_firstlineno', 'co_flags', 'co_freevars',
+          'co_kwonlyargcount', 'co_lnotab', 'co_name', 'co_names',
+          'co_nlocals', 'co_stacksize', 'co_varnames']
+          </code></pre>
+        </section>
+
+        <section>
+          Code Instructions
+          <pre><code data-trim data-line-numbers="1-2|3-5">
+          &gt;&gt;&gt; c.co_code
+          b'd\x00Z\x00d\x01Z\x01e\x02e\x01e\x00\x17\x00\x83\x01\x01\x00d\x02S\x00'
+          &gt;&gt;&gt; [ _ for _ in c.co_code ]
+          [100, 0, 90, 0, 100, 1, 90, 1, 101, 2, 101, 1, 101, 0, 23,
+          0, 131, 1, 1, 0, 100, 2, 83, 0]
+          </code></pre>
+        </section>
+
+        <section>
+          Disassembly
+          <pre><code data-trim data-line-numbers="1|2-14|3-4|5-6|7-14">
+          &gt;&gt;&gt; import dis
+          &gt;&gt;&gt; dis.dis(c)
+          1   0 LOAD_CONST               0 (42)
+              2 STORE_NAME               0 (a)
+          2   4 LOAD_CONST               1 (3.14)
+              6 STORE_NAME               1 (b)
+          3   8 LOAD_NAME                2 (print)
+             10 LOAD_NAME                1 (b)
+             12 LOAD_NAME                0 (a)
+             14 BINARY_ADD
+             16 CALL_FUNCTION            1
+             18 POP_TOP
+             20 LOAD_CONST               2 (None)
+             22 RETURN_VALUE
+          </code></pre>
+        </section>
+
+        <section data-background-iframe="https://docs.python.org/3.7/library/dis.html#python-bytecode-instructions" data-background-interactive>
+        </section>
+
+        <section>
+          <pre><code data-trim data-line-numbers="1-3|4-5|6-7|8-9">
+          &gt;&gt;&gt; [ _ for _ in c.co_code ]
+          [100, 0, 90, 0, 100, 1, 90, 1, 101, 2, 101, 1, 101, 0, 23,
+          0, 131, 1, 1, 0, 100, 2, 83, 0]
+          &gt;&gt;&gt; c.co_consts
+          (42, 3.14, None)
+          &gt;&gt;&gt; c.co_names
+          ('a', 'b', 'print')
+          &gt;&gt;&gt; exec(c)
+          45.14
+          </code></pre>
+        </section>
+
+        <section>
+          Back to pyc
+        </section>
+
+        <section data-background-iframe="https://docs.python.org/3.7/library/marshal.html" data-background-interactive>
         </section>
 			</div>
 		</div>
